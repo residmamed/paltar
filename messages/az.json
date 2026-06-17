@@ -1,0 +1,67 @@
+{
+  "common": {
+    "appName": "Paltar",
+    "tagline": "İkinci əl geyimlər bazarı",
+    "loading": "Yüklənir...",
+    "search": "Axtar",
+    "save": "Yadda saxla",
+    "cancel": "Ləğv et",
+    "delete": "Sil",
+    "edit": "Redaktə et",
+    "back": "Geri",
+    "comingSoon": "Tezliklə"
+  },
+  "nav": {
+    "browse": "Elanlar",
+    "stores": "Mağazalar",
+    "sell": "Elan yerləşdir",
+    "messages": "Mesajlar",
+    "login": "Daxil ol",
+    "register": "Qeydiyyat",
+    "account": "Hesabım",
+    "logout": "Çıxış"
+  },
+  "home": {
+    "heroTitle": "Geyimlərini sat, axtardığını tap",
+    "heroSubtitle": "Azərbaycanda ikinci əl geyimlər üçün elan platforması. Onlayn ödəniş və çatdırılma yoxdur — satıcı ilə birbaşa əlaqə.",
+    "searchPlaceholder": "Geyim, marka və ya ölçü axtar...",
+    "browseByDepartment": "Kateqoriyalar",
+    "topStores": "Ən yaxşı mağazalar",
+    "diamondListings": "Diamond elanlar",
+    "recommended": "Tövsiyə olunan elanlar",
+    "sellCta": "Elan yerləşdir",
+    "becomeStoreCta": "Mağaza ol",
+    "noListingsYet": "Hələ elan yoxdur"
+  },
+  "footer": {
+    "about": "Haqqımızda",
+    "terms": "İstifadə şərtləri",
+    "privacy": "Məxfilik siyasəti",
+    "contact": "Əlaqə",
+    "copyright": "© {year} Paltar. Bütün hüquqlar qorunur."
+  },
+  "department": {
+    "WOMEN": "Qadın",
+    "MEN": "Kişi",
+    "KIDS": "Uşaq",
+    "UNISEX": "Uniseks"
+  },
+  "category": {
+    "OUTERWEAR": "Üst geyim",
+    "TOPS": "Köynək və bluza",
+    "BOTTOMS": "Şalvar və ətək",
+    "DRESSES": "Don",
+    "FOOTWEAR": "Ayaqqabı",
+    "ACCESSORIES": "Aksesuar",
+    "ACTIVEWEAR": "İdman geyimi",
+    "OTHER": "Digər"
+  },
+  "condition": {
+    "NEW": "Yeni",
+    "USED": "İşlənmiş"
+  },
+  "promotion": {
+    "VIP": "VIP",
+    "DIAMOND": "Diamond"
+  }
+}
