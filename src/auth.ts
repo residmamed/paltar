@@ -4,7 +4,8 @@ import { prisma } from "@/lib/db";
 import { verifyPassword } from "@/lib/password";
 import { verifyOtp } from "@/lib/otp";
 import { normalizePhone } from "@/lib/phone";
-import { emailLoginSchema, phoneVerifySchema } from "@/lib/validations/auth";
+import { emailLoginSchema, phoneVerifySchema, storeNameSchema } from "@/lib/validations/auth";
+import { ensureUniqueStoreSlug } from "@/lib/store-slug";
 import { Role } from "@/generated/prisma/enums";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -36,7 +37,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Credentials({
       id: "phone-otp",
       name: "Phone",
-      credentials: { phone: {}, code: {} },
+      credentials: {
+        phone: {},
+        code: {},
+        authMode: {},
+        accountType: {},
+        storeName: {},
+      },
       async authorize(raw) {
         const parsed = phoneVerifySchema.safeParse(raw);
         if (!parsed.success) return null;
@@ -46,7 +53,45 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const result = await verifyOtp(phone, parsed.data.code);
         if (!result.ok) return null;
 
-        // Verifying the phone IS the account: create it on first sign-in.
+        const authMode = raw?.authMode === "register" ? "register" : "login";
+        const accountType = raw?.accountType === "business" ? "business" : "individual";
+
+        if (authMode === "login") {
+          const user = await prisma.user.findUnique({ where: { phone } });
+          if (!user || user.bannedAt) return null;
+          return {
+            id: user.id,
+            name: user.displayName,
+            role: user.role,
+          };
+        }
+
+        if (accountType === "business") {
+          const storeParsed = storeNameSchema.safeParse(raw?.storeName);
+          if (!storeParsed.success) return null;
+
+          const existing = await prisma.user.findUnique({ where: { phone } });
+          if (existing) return null;
+
+          const slug = await ensureUniqueStoreSlug(storeParsed.data);
+          const user = await prisma.user.create({
+            data: {
+              phone,
+              phoneVerified: true,
+              displayName: storeParsed.data,
+              role: Role.STORE,
+              storeProfile: {
+                create: { name: storeParsed.data, slug },
+              },
+            },
+          });
+          return {
+            id: user.id,
+            name: user.displayName,
+            role: user.role,
+          };
+        }
+
         const user = await prisma.user.upsert({
           where: { phone },
           update: { phoneVerified: true },

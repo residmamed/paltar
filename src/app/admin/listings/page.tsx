@@ -30,10 +30,10 @@ export default async function AdminListingsPage({
       images: { orderBy: { position: "asc" }, take: 1 },
       owner: { select: { displayName: true, email: true, phone: true } },
     },
-    orderBy: {
-      createdAt: active.state === ListingState.PENDING ? "asc" : "desc",
-    },
-    take: 100,
+    orderBy:
+      active.state === ListingState.PENDING
+        ? [{ createdAt: "asc" }]
+        : [{ approvedAt: "desc" }, { createdAt: "desc" }],
   });
 
   return (

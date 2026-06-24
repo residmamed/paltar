@@ -9,14 +9,22 @@ import {
 import { Input, Label } from "@/components/ui/input";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Alert } from "@/components/ui/alert";
+import type { AccountType } from "@/lib/validations/auth";
 
 const initial: FormState = {};
 
-export function PhoneForm() {
+type PhoneFormProps = {
+  mode: "login" | "register";
+  accountType: AccountType;
+};
+
+export function PhoneForm({ mode, accountType }: PhoneFormProps) {
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [phone, setPhone] = useState("");
+  const [storeName, setStoreName] = useState("");
   const [sendState, sendAction] = useActionState(sendPhoneOtp, initial);
   const [verifyState, verifyAction] = useActionState(verifyPhoneOtp, initial);
+  const isBusinessRegister = mode === "register" && accountType === "business";
 
   useEffect(() => {
     if (sendState.ok) setStep("code");
@@ -26,6 +34,19 @@ export function PhoneForm() {
     return (
       <form action={sendAction} className="space-y-4">
         {sendState.error && <Alert>{sendState.error}</Alert>}
+        {isBusinessRegister && (
+          <div>
+            <Label htmlFor="storeName">Mağaza adı</Label>
+            <Input
+              id="storeName"
+              name="storeName"
+              autoComplete="organization"
+              value={storeName}
+              onChange={(e) => setStoreName(e.target.value)}
+              required
+            />
+          </div>
+        )}
         <div>
           <Label htmlFor="phone">Telefon nömrəsi</Label>
           <Input
@@ -49,9 +70,12 @@ export function PhoneForm() {
 
   return (
     <form action={verifyAction} className="space-y-4">
+      <input type="hidden" name="phone" value={phone} />
+      <input type="hidden" name="accountType" value={accountType} />
+      <input type="hidden" name="authMode" value={mode} />
+      {isBusinessRegister && <input type="hidden" name="storeName" value={storeName} />}
       {verifyState.error && <Alert>{verifyState.error}</Alert>}
       {sendState.info && <Alert variant="success">{sendState.info}</Alert>}
-      <input type="hidden" name="phone" value={phone} />
       <div>
         <Label htmlFor="code">Təsdiq kodu</Label>
         <Input
@@ -66,7 +90,7 @@ export function PhoneForm() {
         <p className="mt-1 text-xs text-zinc-500">{phone} nömrəsinə göndərildi.</p>
       </div>
       <SubmitButton className="w-full" size="lg">
-        Təsdiqlə və daxil ol
+        {mode === "register" ? "Qeydiyyatı tamamla" : "Təsdiqlə və daxil ol"}
       </SubmitButton>
       <button
         type="button"

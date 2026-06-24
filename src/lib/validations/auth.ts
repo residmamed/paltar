@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+export const accountTypeSchema = z.enum(["individual", "business"]);
+
+export type AccountType = z.infer<typeof accountTypeSchema>;
+
+export const storeNameSchema = z
+  .string()
+  .trim()
+  .min(2, "Mağaza adı ən azı 2 simvol olmalıdır")
+  .max(80, "Mağaza adı çox uzundur");
+
 export const emailSchema = z.string().trim().toLowerCase().email();
 
 export const passwordSchema = z
@@ -15,6 +25,10 @@ export const emailRegisterSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   displayName: z.string().trim().min(1).max(80).optional(),
+});
+
+export const businessEmailRegisterSchema = emailRegisterSchema.extend({
+  storeName: storeNameSchema,
 });
 
 export const emailLoginSchema = z.object({

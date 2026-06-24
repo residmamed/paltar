@@ -15,12 +15,32 @@ import {
   hasFreeSlot,
   isContentChanged,
 } from "@/lib/listings";
+import {
+  extractListingFormValues,
+  type ListingFormValues,
+} from "@/lib/listings/form-values";
 import { ListingState, Role } from "@/generated/prisma/enums";
 
-export type ListingFormState = { error?: string };
+export type ListingFormState = {
+  error?: string;
+  values?: ListingFormValues;
+  revision?: number;
+};
 
 const LIMIT_MSG =
   "Aktiv elan limitinə çatmısınız (5). Yeni elan üçün birini deaktiv edin və ya mağaza olun.";
+
+function validationError(
+  prev: ListingFormState,
+  formData: FormData,
+  error: string,
+): ListingFormState {
+  return {
+    error,
+    values: extractListingFormValues(formData),
+    revision: (prev.revision ?? 0) + 1,
+  };
+}
 
 type ParseResult =
   | { ok: true; data: ListingInput }
@@ -57,24 +77,24 @@ function parseListingForm(formData: FormData): ParseResult {
 }
 
 export async function createListing(
-  _prev: ListingFormState,
+  prev: ListingFormState,
   formData: FormData,
 ): Promise<ListingFormState> {
   const user = await requireUser();
   const parsed = parseListingForm(formData);
-  if (!parsed.ok) return { error: parsed.error };
+  if (!parsed.ok) return validationError(prev, formData, parsed.error);
 
-  if (!(await hasFreeSlot(user))) return { error: LIMIT_MSG };
+  if (!(await hasFreeSlot(user))) {
+    return validationError(prev, formData, LIMIT_MSG);
+  }
 
   const { images, ...fields } = parsed.data;
-  // Admins are the reviewers — their own listings publish immediately.
-  const isAdmin = user.role === Role.ADMIN;
   await prisma.listing.create({
     data: {
       ownerId: user.id,
       ...fields,
-      state: isAdmin ? ListingState.ACTIVE : ListingState.PENDING,
-      approvedAt: isAdmin ? new Date() : null,
+      state: ListingState.PENDING,
+      approvedAt: null,
       images: {
         create: images.map((url, i) => ({ url, position: i })),
       },
@@ -87,7 +107,7 @@ export async function createListing(
 
 export async function updateListing(
   id: string,
-  _prev: ListingFormState,
+  prev: ListingFormState,
   formData: FormData,
 ): Promise<ListingFormState> {
   const user = await requireUser();
@@ -96,11 +116,11 @@ export async function updateListing(
     include: { images: { orderBy: { position: "asc" } } },
   });
   if (!listing || listing.ownerId !== user.id) {
-    return { error: "Elan tapılmadı" };
+    return validationError(prev, formData, "Elan tapılmadı");
   }
 
   const parsed = parseListingForm(formData);
-  if (!parsed.ok) return { error: parsed.error };
+  if (!parsed.ok) return validationError(prev, formData, parsed.error);
   const data = parsed.data;
 
   // Price-only edits stay live; any content/image change forces re-review —
@@ -113,7 +133,7 @@ export async function updateListing(
   const wasCounted = COUNTED_STATES.includes(listing.state);
   const willCount = COUNTED_STATES.includes(newState);
   if (willCount && !wasCounted && !(await hasFreeSlot(user, id))) {
-    return { error: LIMIT_MSG };
+    return validationError(prev, formData, LIMIT_MSG);
   }
 
   const { images, ...fields } = data;

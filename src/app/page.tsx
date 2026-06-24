@@ -1,13 +1,58 @@
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { prisma } from "@/lib/db";
 import { DEPARTMENTS, CATEGORIES } from "@/lib/constants";
+import { ListingCard } from "@/components/listings/listing-card";
+import {
+  Category,
+  Condition,
+  Department,
+  ListingState,
+  PromotionTier,
+} from "@/generated/prisma/enums";
+import { emptyOnDatabaseUnavailable } from "@/lib/prisma-errors";
 
-export default function Home() {
-  const th = useTranslations("home");
-  const td = useTranslations("department");
-  const tcat = useTranslations("category");
-  const tc = useTranslations("common");
+type PublicListing = {
+  id: string;
+  title: string;
+  department: Department;
+  category: Category;
+  condition: Condition;
+  brand: string | null;
+  size: string;
+  priceMinor: number;
+  city: string;
+  images: { url: string }[];
+};
 
+export default async function Home() {
+  const [th, td, tcat, tc, diamondListings, recommendedListings] = await Promise.all([
+    getTranslations("home"),
+    getTranslations("department"),
+    getTranslations("category"),
+    getTranslations("common"),
+    emptyOnDatabaseUnavailable(
+      () => prisma.listing.findMany({
+        where: {
+          state: ListingState.ACTIVE,
+          promotions: {
+            some: { tier: PromotionTier.DIAMOND, expiresAt: { gt: new Date() } },
+          },
+        },
+        include: { images: { orderBy: { position: "asc" }, take: 1 } },
+        orderBy: [{ approvedAt: "desc" }, { createdAt: "desc" }],
+        take: 8,
+      }),
+    ),
+    emptyOnDatabaseUnavailable(
+      () => prisma.listing.findMany({
+        where: { state: ListingState.ACTIVE },
+        include: { images: { orderBy: { position: "asc" }, take: 1 } },
+        orderBy: [{ approvedAt: "desc" }, { createdAt: "desc" }],
+        take: 12,
+      }),
+    ),
+  ]);
   return (
     <div className="mx-auto max-w-6xl px-4">
       {/* Hero */}
@@ -65,21 +110,38 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Data-driven sections wired up in later phases (promotions, recommended). */}
-      <PlaceholderSection title={th("topStores")} />
-      <PlaceholderSection title={th("diamondListings")} />
-      <PlaceholderSection title={th("recommended")} />
+      <ListingSection title={th("diamondListings")} listings={diamondListings} />
+      <ListingSection title={th("recommended")} listings={recommendedListings} />
     </div>
   );
 }
 
-function PlaceholderSection({ title }: { title: string }) {
+function ListingSection({
+  title,
+  listings,
+}: {
+  title: string;
+  listings: PublicListing[];
+}) {
   return (
     <section className="py-6">
-      <h2 className="mb-4 text-lg font-semibold">{title}</h2>
-      <div className="flex h-32 items-center justify-center rounded-2xl border border-dashed border-zinc-300 text-sm text-zinc-400">
-        —
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-lg font-semibold">{title}</h2>
+        <Link href="/search" className="text-sm font-medium text-brand-600 hover:text-brand-700">
+          Hamısına bax
+        </Link>
       </div>
+      {listings.length === 0 ? (
+        <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-zinc-300 text-sm text-zinc-400">
+          —
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {listings.map((listing) => (
+            <ListingCard key={listing.id} listing={listing} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

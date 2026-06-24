@@ -1,26 +1,33 @@
-import Link from "next/link";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getSessionUser } from "@/lib/auth-helpers";
 import { AuthTabs } from "@/components/auth/auth-tabs";
+import type { AccountType } from "@/lib/validations/auth";
 
 export const metadata: Metadata = { title: "Daxil ol" };
 
-export default async function LoginPage() {
+type PageProps = {
+  searchParams: Promise<{ type?: string }>;
+};
+
+function accountTypeFromParam(value?: string): AccountType {
+  return value === "business" ? "business" : "individual";
+}
+
+export default async function LoginPage({ searchParams }: PageProps) {
   if (await getSessionUser()) redirect("/account");
+
+  const params = await searchParams;
 
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-12">
       <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
         <h1 className="mb-6 text-center text-2xl font-bold">Daxil ol</h1>
-        <AuthTabs mode="login" />
+        <Suspense fallback={null}>
+          <AuthTabs mode="login" initialAccountType={accountTypeFromParam(params.type)} />
+        </Suspense>
       </div>
-      <p className="mt-6 text-center text-sm text-zinc-500">
-        Hesabınız yoxdur?{" "}
-        <Link href="/register" className="font-medium text-brand-600 hover:underline">
-          Qeydiyyatdan keçin
-        </Link>
-      </p>
     </div>
   );
 }

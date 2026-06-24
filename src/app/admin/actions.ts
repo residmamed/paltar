@@ -7,6 +7,8 @@ import { ListingState } from "@/generated/prisma/enums";
 
 /** Refresh every surface that shows a listing's review state. */
 function revalidateReview(id: string) {
+  revalidatePath("/");
+  revalidatePath("/search");
   revalidatePath("/admin");
   revalidatePath("/admin/listings");
   revalidatePath(`/admin/listings/${id}`);

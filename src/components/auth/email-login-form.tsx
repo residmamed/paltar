@@ -5,13 +5,15 @@ import { loginWithEmail, type FormState } from "@/app/(auth)/actions";
 import { Input, Label } from "@/components/ui/input";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Alert } from "@/components/ui/alert";
+import type { AccountType } from "@/lib/validations/auth";
 
 const initial: FormState = {};
 
-export function EmailLoginForm() {
+export function EmailLoginForm({ accountType }: { accountType: AccountType }) {
   const [state, action] = useActionState(loginWithEmail, initial);
   return (
     <form action={action} className="space-y-4">
+      <input type="hidden" name="accountType" value={accountType} />
       {state.error && <Alert>{state.error}</Alert>}
       <div>
         <Label htmlFor="email">E-poçt</Label>
