@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { getSessionUser } from "@/lib/auth-helpers";
+import { getCurrentUser } from "@/lib/auth-helpers";
 import { AuthTabs } from "@/components/auth/auth-tabs";
 import type { AccountType } from "@/lib/validations/auth";
 
@@ -16,7 +16,7 @@ function accountTypeFromParam(value?: string): AccountType {
 }
 
 export default async function LoginPage({ searchParams }: PageProps) {
-  if (await getSessionUser()) redirect("/account");
+  if (await getCurrentUser()) redirect("/account");
 
   const params = await searchParams;
 

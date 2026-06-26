@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import {
   sendPhoneOtp,
   verifyPhoneOtp,
@@ -22,13 +22,15 @@ export function PhoneForm({ mode, accountType }: PhoneFormProps) {
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [phone, setPhone] = useState("");
   const [storeName, setStoreName] = useState("");
-  const [sendState, sendAction] = useActionState(sendPhoneOtp, initial);
+  const [sendState, setSendState] = useState<FormState>(initial);
   const [verifyState, verifyAction] = useActionState(verifyPhoneOtp, initial);
   const isBusinessRegister = mode === "register" && accountType === "business";
 
-  useEffect(() => {
-    if (sendState.ok) setStep("code");
-  }, [sendState]);
+  async function sendAction(formData: FormData) {
+    const nextState = await sendPhoneOtp(initial, formData);
+    setSendState(nextState);
+    if (nextState.ok) setStep("code");
+  }
 
   if (step === "phone") {
     return (
@@ -94,7 +96,10 @@ export function PhoneForm({ mode, accountType }: PhoneFormProps) {
       </SubmitButton>
       <button
         type="button"
-        onClick={() => setStep("phone")}
+        onClick={() => {
+          setSendState(initial);
+          setStep("phone");
+        }}
         className="w-full text-center text-sm text-zinc-500 hover:text-zinc-800"
       >
         Nömrəni dəyiş

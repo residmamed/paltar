@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Search, Plus, User as UserIcon, ShieldCheck } from "lucide-react";
-import { getSessionUser } from "@/lib/auth-helpers";
-import { Role } from "@/generated/prisma/enums";
+import { Search, Plus, User as UserIcon } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth-helpers";
 
 export async function SiteHeader() {
   const [t, tc, th] = await Promise.all([
@@ -10,7 +9,7 @@ export async function SiteHeader() {
     getTranslations("common"),
     getTranslations("home"),
   ]);
-  const user = await getSessionUser();
+  const user = await getCurrentUser();
 
   return (
     <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/90 backdrop-blur">
@@ -48,31 +47,13 @@ export async function SiteHeader() {
           >
             {t("stores")}
           </Link>
-          {user?.role === Role.ADMIN && (
-            <Link
-              href="/admin"
-              className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-brand-600 hover:bg-brand-50"
-            >
-              <ShieldCheck className="size-4" />
-              <span className="hidden sm:inline">Admin</span>
-            </Link>
-          )}
-          {user ? (
-            <Link
-              href="/account"
-              className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-zinc-700 hover:bg-zinc-100"
-            >
-              <UserIcon className="size-4" />
-              <span className="hidden sm:inline">{t("account")}</span>
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="rounded-full px-3 py-2 text-zinc-700 hover:bg-zinc-100"
-            >
-              {t("login")}
-            </Link>
-          )}
+          <Link
+            href={user ? "/account" : "/login"}
+            className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-zinc-700 hover:bg-zinc-100"
+          >
+            <UserIcon className="size-4" />
+            <span className="hidden sm:inline">{t("account")}</span>
+          </Link>
         </nav>
       </div>
     </header>

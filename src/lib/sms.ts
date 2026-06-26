@@ -7,7 +7,6 @@ export async function sendSms(to: string, message: string): Promise<void> {
   const provider = process.env.SMS_PROVIDER ?? "stub";
 
   if (provider === "stub") {
-    // eslint-disable-next-line no-console
     console.log(`\n[SMS:stub] to=${to}\n[SMS:stub] ${message}\n`);
     return;
   }
