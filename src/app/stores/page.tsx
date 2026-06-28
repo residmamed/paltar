@@ -22,6 +22,7 @@ export default async function StoresPage() {
         storeProfile: {
           select: {
             name: true,
+            slug: true,
             logoUrl: true,
           },
         },
@@ -79,7 +80,7 @@ export default async function StoresPage() {
                     {store.storeProfile.name}
                   </h2>
                   <Link
-                    href={`/stores/${store.id}`}
+                    href={`/stores/${store.storeProfile.slug}`}
                     className="shrink-0 rounded-full bg-white px-4 py-2 text-sm font-medium text-zinc-900 shadow-sm hover:bg-zinc-100"
                   >
                     Mağazaya bax
