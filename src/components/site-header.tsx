@@ -12,23 +12,23 @@ export async function SiteHeader() {
   const user = await getCurrentUser();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-dashed border-[#C9C2B4] bg-[#F3EEE4]/92 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
         <Link
           href="/"
-          className="shrink-0 text-xl font-bold tracking-tight text-brand-600"
+          className="font-display shrink-0 text-xl tracking-normal text-[#2F3A8F] outline-none focus-visible:ring-2 focus-visible:ring-[#2F3A8F] focus-visible:ring-offset-4 focus-visible:ring-offset-[#F3EEE4]"
         >
           {tc("appName")}
         </Link>
 
         <form action="/search" className="hidden flex-1 sm:block">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#2F3A8F]" />
             <input
               type="search"
               name="q"
               placeholder={th("searchPlaceholder")}
-              className="w-full rounded-full border border-zinc-200 bg-zinc-50 py-2 pl-9 pr-4 text-sm outline-none focus:border-brand-500 focus:bg-white"
+              className="font-tag w-full border border-dashed border-[#C9C2B4] bg-[#FFF9ED] py-2 pl-9 pr-4 text-xs text-[#241F1C] outline-none placeholder:text-[#7B7064] focus:border-[#2F3A8F] focus:ring-2 focus:ring-[#2F3A8F]/20"
             />
           </div>
         </form>
@@ -36,20 +36,20 @@ export async function SiteHeader() {
         <nav className="flex shrink-0 items-center gap-1 text-sm font-medium">
           <Link
             href="/listings/new"
-            className="inline-flex items-center gap-1 rounded-full bg-brand-600 px-3 py-2 text-white hover:bg-brand-700"
+            className="torn-button inline-flex items-center gap-1 bg-[#D89B3C] px-3 py-2 text-[#241F1C] outline-none transition hover:-translate-y-0.5 hover:bg-[#C9892E] focus-visible:ring-2 focus-visible:ring-[#2F3A8F] focus-visible:ring-offset-4 focus-visible:ring-offset-[#F3EEE4]"
           >
             <Plus className="size-4" />
             <span className="hidden md:inline">{t("sell")}</span>
           </Link>
           <Link
             href="/stores"
-            className="hidden rounded-full px-3 py-2 text-zinc-700 hover:bg-zinc-100 md:inline-block"
+            className="hidden px-3 py-2 text-[#241F1C] underline decoration-[#C9C2B4] decoration-dashed underline-offset-4 outline-none hover:text-[#2F3A8F] focus-visible:ring-2 focus-visible:ring-[#2F3A8F] focus-visible:ring-offset-4 focus-visible:ring-offset-[#F3EEE4] md:inline-block"
           >
             {t("stores")}
           </Link>
           <Link
             href={user ? "/account" : "/login"}
-            className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-zinc-700 hover:bg-zinc-100"
+            className="inline-flex items-center gap-1 px-3 py-2 text-[#241F1C] outline-none hover:text-[#2F3A8F] focus-visible:ring-2 focus-visible:ring-[#2F3A8F] focus-visible:ring-offset-4 focus-visible:ring-offset-[#F3EEE4]"
           >
             <UserIcon className="size-4" />
             <span className="hidden sm:inline">{t("account")}</span>
